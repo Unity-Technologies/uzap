@@ -1,5 +1,4 @@
-# uzap
-[![GoDoc](https://godoc.prd.cds.internal.unity3d.com/github.com/Unity-Technologies/uzap?status.svg)](https://godoc.prd.cds.internal.unity3d.com/github.com/Unity-Technologies/uzap)
+# :zap: uzap [![GoDoc][doc-img]][doc]
 
 This repo contains basic configuration for go.uber.org/zap, for easy use with 12-factor apps.
 
@@ -18,3 +17,7 @@ logger.Info("failed to fetch URL",
 	zap.Duration("backoff", time.Second),
 )
 ```
+
+
+[doc-img]: https://img.shields.io/badge/godoc-reference-blue
+[doc]: https://godoc.prd.cds.internal.unity3d.com/github.com/Unity-Technologies/uzap
