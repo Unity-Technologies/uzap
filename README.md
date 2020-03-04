@@ -10,7 +10,8 @@ import (
 )
 zap.ReplaceGlobals(uzap.Log)
 defer uzap.Log.Sync()
-logger.Info("failed to fetch URL",
+
+zap.L().Info("failed to fetch URL",
 	// Structured context as strongly typed Field values.
 	zap.String("url", url),
 	zap.Int("attempt", 3),
