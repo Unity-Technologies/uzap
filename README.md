@@ -11,6 +11,7 @@ import (
 
 // For ease of use, call this in main()
 zap.ReplaceGlobals(uzap.Log)
+zap.RedirectStdLog(uzap.Log)
 defer uzap.Log.Sync()
 
 // Example

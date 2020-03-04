@@ -69,5 +69,4 @@ func init() {
 	)
 	// From a zapcore.Core, it's easy to construct a Logger.
 	Log = zap.New(core)
-	zap.RedirectStdLog(Log)
 }
