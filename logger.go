@@ -65,16 +65,16 @@ func NewZap(opt *Options) (*zap.Logger, zap.AtomicLevel) {
 	return zap.New(core), level
 }
 
-// MustZap is ease of use function that replaces the zap globals
-// it returns a deferrable function, for calling sync at program termination
-// Use, put this in main():
-//   defer uzap.MustZap()()
+// MustZap is an ease of use function that replaces zap globals
+// and redirects standard `package log` output to a new zap logger.
+// It returns a deferrable function, for calling zap.Logger.Sync at program termination.
 func MustZap() func() {
 	return MustZapWithLevel(zapcore.InfoLevel)
 }
 
-// MustZapWithLevel is ease of use function that replaces the zap globals
-// it returns a deferrable function, for calling sync at program termination.
+// MustZapWithLevel is an ease of use function that replaces zap globals
+// and redirects standard `package log` output to a new zap logger.
+// It returns a deferrable function, for calling zap.Logger.Sync at program termination.
 func MustZapWithLevel(lvl zapcore.Level) func() {
 	opt := &Options{Level: lvl}
 	if err := envconfig.Process("log", opt); err != nil {
