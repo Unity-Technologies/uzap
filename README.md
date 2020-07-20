@@ -41,7 +41,7 @@ On it's own this does mostly nothing, [go.uber.org/zap](https://pkg.go.dev/go.ub
 - It has a one-liner for ease of use.
 - It sends informational logs to stdout and higher priority logs to stderr, which is needed for production-ready kubernetes logging.
 - It encodes the output in a stackdriver friendly (but not overly specific) (json) format.
-- It has an atomic error log level, so it can be safely modified from anywhere.
+ - It has an atomic log level, so it can be safely modified from anywhere.
 - It optionally supports a human friendly debug output.
 - It reads config from environment variables (can be changed/overridden afterwards).
 

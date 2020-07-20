@@ -16,9 +16,11 @@ type Options struct {
 	Debug bool          // defaults to false
 }
 
-// NewZap configures a zap.Logger for use in container based environments
-// it returns a pointer to a zap.Logger and the log level.
-func NewZap(opt *Options) (*zap.Logger, zap.AtomicLevel) {
+// NewZapLogger configures a zap.Logger for use in container based environments
+// ERROR level logs are written to stderr & all other levels are written to stdout
+// Useful in a Kubernetes deployment where stderr & stdout are interpreted as ERROR & INFO level logs respectively
+// o.Debug controls the loggers output. Human readable when true; JSON when false
+func NewZapLogger(o *Options) (*zap.Logger, zap.AtomicLevel) {
 	if opt == nil {
 		opt = &Options{}
 	}
