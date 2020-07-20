@@ -29,7 +29,7 @@ log.Println("std log example")
 
 Customizable examble
 ``` go
-logger, level := uzap.NewZap(&uzap.Options{})
+logger, level := uzap.NewZapLogger(&uzap.Options{})
 zap.ReplaceGlobals(logger)
 zap.RedirectStdLog(logger)
 defer logger.Sync() // nolint:errcheck

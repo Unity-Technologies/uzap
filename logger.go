@@ -13,19 +13,19 @@ import (
 // Options is used to parse environment vars with the log level and optional debug flag.
 type Options struct {
 	Level zapcore.Level // zap defaults to INFO
-	Debug bool          // defaults to false
+	Debug bool          // defaults to false, displays human readable output instead of json
 }
 
 // NewZapLogger configures a zap.Logger for use in container based environments
-// ERROR level logs are written to stderr & all other levels are written to stdout
-// Useful in a Kubernetes deployment where stderr & stdout are interpreted as ERROR & INFO level logs respectively
-// o.Debug controls the loggers output. Human readable when true; JSON when false
-func NewZapLogger(o *Options) (*zap.Logger, zap.AtomicLevel) {
-	if opt == nil {
-		opt = &Options{}
+// ERROR level logs are written to stderr and all other levels are written to stdout
+// Useful in Kubernetes where stderr & stdout are interpreted as ERROR & INFO level logs respectively
+// opts.Debug controls the loggers output. Human readable when true; JSON when false.
+func NewZapLogger(opts *Options) (*zap.Logger, zap.AtomicLevel) {
+	if opts == nil {
+		opts = &Options{}
 	}
 
-	level := zap.NewAtomicLevelAt(opt.Level)
+	level := zap.NewAtomicLevelAt(opts.Level)
 
 	// High-priority output should also go to standard error, and low-priority
 	// output should also go to standard out.
@@ -49,7 +49,7 @@ func NewZapLogger(o *Options) (*zap.Logger, zap.AtomicLevel) {
 		enc  zapcore.Encoder
 	)
 
-	if opt.Debug {
+	if opts.Debug {
 		ecfg = zapdriver.NewDevelopmentEncoderConfig()
 		enc = zapcore.NewConsoleEncoder(ecfg)
 	} else {
@@ -78,12 +78,12 @@ func MustZap() func() {
 // and redirects standard `package log` output to a new zap logger.
 // It returns a deferrable function, for calling zap.Logger.Sync at program termination.
 func MustZapWithLevel(lvl zapcore.Level) func() {
-	opt := &Options{Level: lvl}
-	if err := envconfig.Process("log", opt); err != nil {
+	opts := &Options{Level: lvl}
+	if err := envconfig.Process("log", opts); err != nil {
 		panic(err)
 	}
 
-	logger, _ := NewZap(opt)
+	logger, _ := NewZapLogger(opts)
 	zap.ReplaceGlobals(logger)
 	zap.RedirectStdLog(logger)
 
