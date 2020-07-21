@@ -1,3 +1,4 @@
+// Package uzap contains basic configuration for go.uber.org/zap, for easy use with 12-factor apps.
 package uzap
 
 import (
