@@ -1,3 +1,4 @@
+// Package uzap contains basic configuration for go.uber.org/zap, for easy use with 12-factor apps.
 package uzap
 
 import (
@@ -10,26 +11,22 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-var (
-	// Log is global logger
-	Log   *zap.Logger
-	Level zap.AtomicLevel
-)
-
-type Config struct {
-	Level zapcore.Level `required:"true" default:"warn"`
-	Debug bool          `required:"true" default:"false"`
+// Options is used to parse environment vars with the log level and optional debug flag.
+type Options struct {
+	Level zapcore.Level // zap defaults to INFO
+	Debug bool          // defaults to false, displays human readable output instead of json
 }
 
-// Use package init to avoid race conditions for GRPC options
-// sync.Once still suffers from races, init functions are less complex than sync.once + waitgroup
-func init() {
-	var cfg Config
-	if err := envconfig.Process("log", &cfg); err != nil {
-		panic(err)
+// NewZapLogger configures a zap.Logger for use in container based environments
+// ERROR level logs are written to stderr and all other levels are written to stdout
+// Useful in Kubernetes where stderr & stdout are interpreted as ERROR & INFO level logs respectively
+// opts.Debug controls the loggers output. Human readable when true; JSON when false.
+func NewZapLogger(opts *Options) (*zap.Logger, zap.AtomicLevel) {
+	if opts == nil {
+		opts = &Options{}
 	}
 
-	Level = zap.NewAtomicLevelAt(cfg.Level)
+	level := zap.NewAtomicLevelAt(opts.Level)
 
 	// High-priority output should also go to standard error, and low-priority
 	// output should also go to standard out.
@@ -40,7 +37,7 @@ func init() {
 		return lvl >= zapcore.ErrorLevel
 	})
 	lowPriority := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
-		return lvl >= Level.Level() && lvl < zapcore.ErrorLevel
+		return lvl >= level.Level() && lvl < zapcore.ErrorLevel
 	})
 
 	// Output channels
@@ -53,7 +50,7 @@ func init() {
 		enc  zapcore.Encoder
 	)
 
-	if cfg.Debug {
+	if opts.Debug {
 		ecfg = zapdriver.NewDevelopmentEncoderConfig()
 		enc = zapcore.NewConsoleEncoder(ecfg)
 	} else {
@@ -68,5 +65,30 @@ func init() {
 		zapcore.NewCore(enc, consoleInfos, lowPriority),
 	)
 	// From a zapcore.Core, it's easy to construct a Logger.
-	Log = zap.New(core)
+	return zap.New(core), level
+}
+
+// MustZap is an ease of use function that replaces zap globals
+// and redirects standard `package log` output to a new zap logger.
+// It returns a deferrable function, for calling zap.Logger.Sync at program termination.
+func MustZap() func() {
+	return MustZapWithLevel(zapcore.InfoLevel)
+}
+
+// MustZapWithLevel is an ease of use function that replaces zap globals
+// and redirects standard `package log` output to a new zap logger.
+// It returns a deferrable function, for calling zap.Logger.Sync at program termination.
+func MustZapWithLevel(lvl zapcore.Level) func() {
+	opts := &Options{Level: lvl}
+	if err := envconfig.Process("log", opts); err != nil {
+		panic(err)
+	}
+
+	logger, _ := NewZapLogger(opts)
+	zap.ReplaceGlobals(logger)
+	zap.RedirectStdLog(logger)
+
+	return func() {
+		_ = logger.Sync()
+	}
 }
