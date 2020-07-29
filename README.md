@@ -46,4 +46,4 @@ On it's own this does mostly nothing, [go.uber.org/zap](https://pkg.go.dev/go.ub
 - It reads config from environment variables (can be changed/overridden afterwards).
 
 [doc-img]: https://img.shields.io/badge/godoc-reference-blue
-[doc]: https://godoc.prd.cds.internal.unity3d.com/github.com/Unity-Technologies/uzap
+[doc]: https://pkg.go.dev/github.com/Unity-Technologies/uzap
