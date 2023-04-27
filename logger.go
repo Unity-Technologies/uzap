@@ -4,7 +4,7 @@ package uzap
 import (
 	"os"
 
-	"github.com/blendle/zapdriver"
+	"github.com/Unity-Technologies/zapdriver"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
