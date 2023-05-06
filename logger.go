@@ -3,6 +3,7 @@ package uzap
 
 import (
 	"os"
+	"time"
 
 	"github.com/Unity-Technologies/zapdriver"
 	"go.uber.org/zap"
@@ -13,8 +14,11 @@ import (
 
 // Options is used to parse environment vars with the log level and optional debug flag.
 type Options struct {
-	Level zapcore.Level // zap defaults to INFO
-	Debug bool          // defaults to false, displays human readable output instead of json
+	Level              zapcore.Level                                 // zap defaults to INFO
+	Debug              bool                                          // defaults to false, displays human readable output instead of json
+	SamplingInitial    int                                           `default:"100" split_words:"true"`
+	SamplingThereafter int                                           `default:"100" split_words:"true"`
+	SamplingHook       func(zapcore.Entry, zapcore.SamplingDecision) `ignored:"true"`
 }
 
 // NewZapLogger configures a zap.Logger for use in container based environments
@@ -64,6 +68,21 @@ func NewZapLogger(opts *Options) (*zap.Logger, zap.AtomicLevel) {
 		zapcore.NewCore(enc, consoleErrors, highPriority),
 		zapcore.NewCore(enc, consoleInfos, lowPriority),
 	)
+
+	if opts.SamplingInitial > 0 && !opts.Debug {
+		var samplerOpts []zapcore.SamplerOption
+		if opts.SamplingHook != nil {
+			samplerOpts = append(samplerOpts, zapcore.SamplerHook(opts.SamplingHook))
+		}
+		core = zapcore.NewSamplerWithOptions(
+			core,
+			time.Second,
+			opts.SamplingInitial,
+			opts.SamplingThereafter,
+			samplerOpts...,
+		)
+	}
+
 	// From a zapcore.Core, it's easy to construct a Logger.
 	return zap.New(core), level
 }
