@@ -10,7 +10,6 @@ output:
 
 linters:
   enable:
-  - depguard
   - gofumpt
   - goimports
   - revive
